@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from config import GPTConfig
-from attention import MaskedMultiHeadSelfAttention
+from .config import GPTConfig
+from .attention import MaskedMultiHeadSelfAttention
 import torch
 
 class MLP(nn.Module):
