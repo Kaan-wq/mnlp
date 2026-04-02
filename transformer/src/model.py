@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from config import GPTConfig
-from blocks import TransformerBlock
+from .config import GPTConfig
+from .blocks import TransformerBlock
 
 class GPT(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
