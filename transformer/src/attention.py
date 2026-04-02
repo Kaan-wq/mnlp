@@ -1,14 +1,13 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-from config import GPTConfig
+from .config import GPTConfig
 
 class MaskedMultiHeadSelfAttention(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()
 
-        self.n_head = config.n_head
-        assert config.n_embd % config.n_head == 0, "Embedding dimension must be divisible by number of heads."
+        self.config = config
 
         # Q, K, V projection matrices
         self.queries = nn.Linear(config.n_embd, config.n_embd, bias=False)
@@ -26,8 +25,8 @@ class MaskedMultiHeadSelfAttention(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         B, T, D = x.size()
-        k = D // self.n_head
-        h = self.n_head
+        h = self.config.n_head
+        k = D // h
 
         # Q, K, V = (B, T, D) -> (B, T, h, k) -> (B, h, T, k)
         Q = self.queries(x).reshape(B, T, h, k).transpose(1, 2)
