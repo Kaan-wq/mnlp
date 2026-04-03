@@ -11,10 +11,10 @@ load_dotenv()
 
 @dataclass
 class TrainingConfig:
-    batch_size:    int   = 128
-    max_iters:     int   = 5000
-    eval_interval: int   = 500
-    eval_iters:    int   = 200
+    batch_size:    int   = 32
+    max_iters:     int   = 1000
+    eval_interval: int   = 100
+    eval_iters:    int   = 10
     learning_rate: float = 3e-4
     data_path:     str   = "data/input.txt"
     device:        str   = "cpu"
