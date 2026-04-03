@@ -16,7 +16,7 @@ class TrainingConfig:
     eval_interval: int   = 100
     eval_iters:    int   = 10
     learning_rate: float = 3e-4
-    data_path:     str   = "data/input.txt"
+    data_path:     str   = "data/tiny_shakespeare.txt"
     device:        str   = "cpu"
 
 
