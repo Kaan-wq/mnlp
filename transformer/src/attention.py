@@ -10,16 +10,16 @@ class MaskedMultiHeadSelfAttention(nn.Module):
         self.config = config
 
         # Q, K, V projection matrices
-        self.queries = nn.Linear(config.n_embd, config.n_embd, bias=False)
-        self.keys = nn.Linear(config.n_embd, config.n_embd, bias=False)
-        self.values = nn.Linear(config.n_embd, config.n_embd, bias=False)
+        self.queries = nn.Linear(config.n_embd, config.n_embd, bias=False, device=config.device)
+        self.keys = nn.Linear(config.n_embd, config.n_embd, bias=False, device=config.device)
+        self.values = nn.Linear(config.n_embd, config.n_embd, bias=False, device=config.device)
 
-        self.out_proj = nn.Linear(config.n_embd, config.n_embd, bias=False)
+        self.out_proj = nn.Linear(config.n_embd, config.n_embd, bias=False, device=config.device)
 
         self.register_buffer(
             "att_mask",
             torch.tril(
-                torch.ones(config.max_seq_length, config.max_seq_length)
+                torch.ones(config.max_seq_length, config.max_seq_length, device=config.device)
             ).reshape(1, 1, config.max_seq_length, config.max_seq_length)
         )
 
