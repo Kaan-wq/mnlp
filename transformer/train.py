@@ -20,13 +20,14 @@ class TrainingConfig:
     device:        str   = "cpu"
 
 
-def load_data(path: str, device: str) -> tuple[torch.Tensor, torch.Tensor, int]:
+def load_data(path: str, device: str) -> tuple[torch.Tensor, torch.Tensor, int, dict, dict]:
     text  = open(path).read()
     chars = sorted(set(text))
-    stoi  = {ch: i for i, ch in enumerate(chars)}
-    data  = torch.as_tensor([stoi[ch] for ch in text], dtype=torch.long, device=device)
+    char_to_idx  = {ch: i for i, ch in enumerate(chars)}
+    idx_to_char  = {i: ch for ch, i in char_to_idx.items()}
+    data  = torch.as_tensor([char_to_idx[ch] for ch in text], dtype=torch.long, device=device)
     n     = int(0.9 * len(data))
-    return data[:n], data[n:], len(chars)
+    return data[:n], data[n:], len(chars), char_to_idx, idx_to_char
 
 
 def get_batch(
@@ -70,7 +71,7 @@ def train(config: GPTConfig, t_config: TrainingConfig) -> None:
         config={**config.__dict__, **t_config.__dict__},
     )
 
-    train_data, val_data, vocab_size = load_data(t_config.data_path, config.device)
+    train_data, val_data, vocab_size, char_to_idx, idx_to_char = load_data(t_config.data_path, config.device)
     config.vocab_size = vocab_size
 
     model     = GPT(config).to(config.device)
@@ -104,7 +105,12 @@ def train(config: GPTConfig, t_config: TrainingConfig) -> None:
         })
 
 
-    torch.save(model.state_dict(), "gpt_model.pth")
+    torch.save({
+        "model_state_dict": model.state_dict(),
+        "char_to_idx": char_to_idx,
+        "idx_to_char": idx_to_char,
+        "config": config,
+    }, "gpt_checkpoint.pth")
     print("Training complete.")
 
 
