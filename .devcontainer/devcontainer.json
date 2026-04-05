@@ -1,7 +1,10 @@
 {
   "name": "LLM Dev",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "postCreateCommand": "pip install poetry && poetry install",
+  "postCreateCommand": "pip install poetry && poetry install --no-root",
+  "remoteEnv": {
+    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
+  },
   "customizations": {
     "vscode": {
       "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
