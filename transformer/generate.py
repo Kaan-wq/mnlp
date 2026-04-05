@@ -80,3 +80,6 @@ def main():
         max_new_tokens=200, temperature=0.8, top_k=40, top_p=0.9
     )
     print(generated_text)
+
+if __name__ == "__main__":
+    main()
