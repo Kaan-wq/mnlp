@@ -67,8 +67,8 @@ def main():
         save_strategy="epoch",
         load_best_model_at_end=True,
         num_train_epochs=3,
-        per_device_train_batch_size=64,
-        per_device_eval_batch_size=64,
+        per_device_train_batch_size=128,
+        per_device_eval_batch_size=128,
         fp16=torch.cuda.is_available(),
         learning_rate=2e-5,
         weight_decay=0.01,
@@ -89,8 +89,8 @@ def main():
         data_collator=data_collator,
         compute_metrics=compute_metrics,
     )
-    results = trainer.evaluate(max_length=128)
-    print(results)
+    # results = trainer.evaluate(max_length=128)
+    # print(results)
     trainer.train()
 
 
