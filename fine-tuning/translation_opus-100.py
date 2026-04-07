@@ -76,6 +76,7 @@ def main():
         predict_with_generate=True,
         metric_for_best_model="bleu",
         greater_is_better=True,
+        push_to_hub=True,
         report_to="wandb",
         run_name="marianmt-en-fr-fine-tuning",
     )
