@@ -21,7 +21,11 @@ dependencies = [
     "accelerate (>=1.13.0,<2.0.0)",
     "sentencepiece (>=0.2.1,<0.3.0)",
     "sacremoses (>=0.1.1,<0.2.0)",
-    "sacrebleu (>=2.6.0,<3.0.0)"
+    "sacrebleu (>=2.6.0,<3.0.0)",
+    "ipykernel (>=7.2.0,<8.0.0)",
+    "gradio-client (>=2.4.0,<3.0.0)",
+    "peft (>=0.18.1,<0.19.0)",
+    "trl (>=1.0.0,<2.0.0)"
 ]
 
 

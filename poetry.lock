@@ -1255,6 +1255,25 @@ doc = ["sphinx (>=7.1.2,<7.2)", "sphinx-autodoc-typehints", "sphinx_rtd_theme"]
 test = ["coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock ; python_version < \"3.8\"", "mypy (==1.18.2) ; python_version >= \"3.9\"", "pre-commit", "pytest (>=7.3.1)", "pytest-cov", "pytest-instafail", "pytest-mock", "pytest-sugar", "typing-extensions ; python_version < \"3.11\""]
 
 [[package]]
+name = "gradio-client"
+version = "2.4.0"
+description = "Python library for easily interacting with trained machine learning models"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "gradio_client-2.4.0-py3-none-any.whl", hash = "sha256:7c170807b924ed6056b2a1fa9d659d349dd20567c00ee0b4dc249dc1e2def620"},
+    {file = "gradio_client-2.4.0.tar.gz", hash = "sha256:781885374f86759b8db5195e13e716c301d14e48e0442aef63362f1eeea4cce2"},
+]
+
+[package.dependencies]
+fsspec = "*"
+httpx = ">=0.24.1"
+huggingface-hub = ">=0.19.3,<2.0"
+packaging = "*"
+typing-extensions = ">=4.0,<5.0"
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -3121,6 +3140,36 @@ files = [
 [package.extras]
 qa = ["flake8 (==5.0.4)", "types-setuptools (==67.2.0.1)", "zuban (==0.5.1)"]
 testing = ["docopt", "pytest"]
+
+[[package]]
+name = "peft"
+version = "0.18.1"
+description = "Parameter-Efficient Fine-Tuning (PEFT)"
+optional = false
+python-versions = ">=3.10.0"
+groups = ["main"]
+files = [
+    {file = "peft-0.18.1-py3-none-any.whl", hash = "sha256:0bf06847a3551e3019fc58c440cffc9a6b73e6e2962c95b52e224f77bbdb50f1"},
+    {file = "peft-0.18.1.tar.gz", hash = "sha256:2dd0d6bfce936d1850e48aaddbd250941c5c02fc8ef3237cd8fd5aac35e0bae2"},
+]
+
+[package.dependencies]
+accelerate = ">=0.21.0"
+huggingface_hub = ">=0.25.0"
+numpy = ">=1.17"
+packaging = ">=20.0"
+psutil = "*"
+pyyaml = "*"
+safetensors = "*"
+torch = ">=1.13.0"
+tqdm = "*"
+transformers = "*"
+
+[package.extras]
+dev = ["black", "black", "hf-doc-builder", "hf-doc-builder", "ruff (>=0.12.8,<0.13.0)"]
+docs-specific = ["black", "hf-doc-builder"]
+quality = ["black", "hf-doc-builder", "ruff (>=0.12.8,<0.13.0)"]
+test = ["black", "black", "datasets", "diffusers", "hf-doc-builder", "hf-doc-builder", "parameterized", "protobuf", "pytest", "pytest-cov", "pytest-xdist", "ruff (>=0.12.8,<0.13.0)", "scipy", "sentencepiece"]
 
 [[package]]
 name = "pexpect"
@@ -5114,6 +5163,40 @@ tests = ["autopep8", "isort", "llnl-hatchet", "numpy", "pytest", "pytest-forked"
 tutorials = ["matplotlib", "pandas", "tabulate"]
 
 [[package]]
+name = "trl"
+version = "1.0.0"
+description = "Train transformer language models with reinforcement learning."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "trl-1.0.0-py3-none-any.whl", hash = "sha256:c45700cb6aa8723e5db1dd8773297f642715accab1ca7754b56e6d50a37dfb1d"},
+    {file = "trl-1.0.0.tar.gz", hash = "sha256:529f447b77007c8d181a3cf3d8b1b6427888cac9ee1e6d583bd0dbda78165ed4"},
+]
+
+[package.dependencies]
+accelerate = ">=1.4.0"
+datasets = ">=4.7.0"
+packaging = ">20.0"
+transformers = ">=4.56.2"
+
+[package.extras]
+bco = ["joblib", "scikit-learn"]
+deepspeed = ["deepspeed (>=0.14.4)", "transformers (!=5.1.0)"]
+dev = ["Pillow", "bitsandbytes", "deepspeed (>=0.14.4)", "hf-doc-builder", "jmespath", "joblib", "kernels", "liger-kernel (>=0.7.0)", "llm-blender (>=0.0.2)", "num2words (==0.5.14)", "openai (>=1.23.2)", "peft (>=0.8.0)", "pre-commit", "pytest", "pytest-cov", "pytest-datadir (>=1.7.0)", "pytest-rerunfailures (==15.1)", "pytest-xdist", "scikit-learn", "torchvision"]
+judges = ["llm-blender (>=0.0.2)", "openai (>=1.23.2)", "transformers (<5.0.0)"]
+kernels = ["kernels"]
+liger = ["liger-kernel (>=0.7.0)"]
+math-verify = ["math-verify (>=0.5.2)"]
+peft = ["peft (>=0.8.0)"]
+quality = ["hf-doc-builder", "pre-commit"]
+quantization = ["bitsandbytes"]
+scikit = ["scikit-learn"]
+test = ["pytest", "pytest-cov", "pytest-datadir (>=1.7.0)", "pytest-rerunfailures (==15.1)", "pytest-xdist"]
+vllm = ["aiohttp (>=3.13.3)", "fastapi", "pydantic", "requests", "uvicorn", "vllm (>=0.10.2,<=0.17.1)"]
+vlm = ["Pillow", "num2words (==0.5.14)", "torchvision"]
+
+[[package]]
 name = "typer"
 version = "0.24.1"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
@@ -5609,4 +5692,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.15"
-content-hash = "837fe509e3f42af79a6b5ac1ea344f73b5c99fa5f31d666f145f9d1b6a360049"
+content-hash = "3403335ba5e779a210f333cd473663035107ace7fbc688207b8ad082c37ea90b"
