@@ -85,6 +85,8 @@ def main():
         gradient_accumulation_steps=4,
         fp16=torch.cuda.is_available(),
         learning_rate=2e-5,
+        lr_scheduler_type="cosine",
+        warmup_ratio=0.1,
         weight_decay=0.01,
         gradient_checkpointing=True,
         predict_with_generate=True,
