@@ -30,6 +30,7 @@ def main():
     checkpoint = "Helsinki-NLP/opus-mt-en-fr"
     tokenizer = MarianTokenizer.from_pretrained(checkpoint)
     model = MarianMTModel.from_pretrained(checkpoint)
+    model.enable_input_require_grads()
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
     metric = evaluate.load("sacrebleu")
 
@@ -85,7 +86,7 @@ def main():
         fp16=torch.cuda.is_available(),
         learning_rate=3e-4,
         weight_decay=0.01,
-        gradient_checkpointing=False,
+        gradient_checkpointing=True,
         predict_with_generate=True,
         metric_for_best_model="bleu",
         greater_is_better=True,
@@ -102,6 +103,7 @@ def main():
         eval_dataset=tokenized_datasets['validation'],
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        processing_class=tokenizer,
     )
     # results = trainer.evaluate(max_length=128)
     # print(results)
