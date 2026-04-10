@@ -104,7 +104,7 @@ def main():
         dataloader_num_workers=4,
         push_to_hub=True,
         report_to="wandb",
-        run_name="marianmt-en-fr_lora",
+        run_name="marianmt-en-fr_qlora",
     )
 
     trainer = Seq2SeqTrainer(
