@@ -100,6 +100,7 @@ def main():
 
     training_args = Seq2SeqTrainingArguments(
         output_dir="test-trainer",
+        logging_steps=10,
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
