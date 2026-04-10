@@ -82,6 +82,7 @@ def main():
         num_train_epochs=3,
         per_device_train_batch_size=128,
         per_device_eval_batch_size=128,
+        gradient_accumulation_steps=4,
         fp16=torch.cuda.is_available(),
         learning_rate=2e-5,
         weight_decay=0.01,
