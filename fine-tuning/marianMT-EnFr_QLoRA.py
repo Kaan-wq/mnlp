@@ -32,7 +32,7 @@ def main():
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_compute_dtype=torch.float16,
         bnb_4bit_use_double_quant=True,
     )
 
@@ -94,7 +94,7 @@ def main():
         per_device_train_batch_size=64,
         per_device_eval_batch_size=64,
         gradient_accumulation_steps=4,
-        bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
+        fp16=torch.cuda.is_available(),
         learning_rate=3e-4,
         weight_decay=0.01,
         gradient_checkpointing=True,
