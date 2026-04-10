@@ -1,4 +1,5 @@
 import torch
+import random
 from transformers import MarianMTModel, MarianTokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer
 from datasets import load_dataset, concatenate_datasets, DatasetDict
 import evaluate
@@ -6,8 +7,20 @@ from dotenv import load_dotenv
 import numpy as np
 load_dotenv()
 
+SEED = 20
+
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
 
 def main():
+    set_seed(SEED)
+
     raw_datasets = load_dataset(
         "Helsinki-NLP/opus-100", "en-fr")
 
@@ -17,13 +30,13 @@ def main():
         [merged_datasets, raw_datasets['test']])
 
     split_train_testeval = merged_datasets.train_test_split(
-        test_size=0.2, seed=20)
+        test_size=0.2, seed=SEED)
     split_eval_test = split_train_testeval['test'].train_test_split(
-        test_size=0.5, seed=20)
+        test_size=0.5, seed=SEED)
     split_datasets = DatasetDict({
-        'train': split_train_testeval['train'],
-        'validation': split_eval_test['train'],
-        'test': split_eval_test['test']
+        'train': split_train_testeval['train'].shuffle(seed=SEED).select(range(30000)),
+        'validation': split_eval_test['train'].shuffle(seed=SEED).select(range(2000)),
+        'test': split_eval_test['test'].shuffle(seed=SEED).select(range(2000))
     })
 
     checkpoint = "Helsinki-NLP/opus-mt-en-fr"
@@ -79,6 +92,7 @@ def main():
         push_to_hub=True,
         report_to="wandb",
         run_name="marianmt-en-fr-fine-tuning",
+        seed=SEED,
     )
 
     trainer = Seq2SeqTrainer(
