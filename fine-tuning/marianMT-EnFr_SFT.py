@@ -75,7 +75,7 @@ def main():
         preprocess_function, batched=True, remove_columns=split_datasets["train"].column_names)
 
     training_args = Seq2SeqTrainingArguments(
-        output_dir="test-trainer",
+        output_dir="marianmt-en-fr-sft",
         logging_steps=10,
         eval_strategy="epoch",
         save_strategy="epoch",

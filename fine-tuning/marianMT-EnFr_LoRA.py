@@ -88,7 +88,7 @@ def main():
     lora_model.print_trainable_parameters()
 
     training_args = Seq2SeqTrainingArguments(
-        output_dir="test-trainer",
+        output_dir="marianmt-en-fr-lora",
         logging_steps=10,
         eval_strategy="epoch",
         save_strategy="epoch",
