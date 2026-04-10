@@ -112,6 +112,18 @@ def main():
     # print(results)
     trainer.train()
 
+    trainer.create_model_card(
+        language="en",
+        license="apache-2.0",
+        tags=["translation", "marian", "lora", "sft"],
+        model_name="MarianMT EN→FR SFT",
+        finetuned_from="Helsinki-NLP/opus-mt-en-fr",
+        tasks="translation",
+        dataset_tags=["Helsinki-NLP/opus-100"],
+        dataset="opus-100",
+    )
+    trainer.push_to_hub()
+
 
 if __name__ == "__main__":
     main()
