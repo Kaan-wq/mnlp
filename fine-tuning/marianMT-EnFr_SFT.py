@@ -88,6 +88,7 @@ def main():
         eval_dataset=tokenized_datasets['validation'],
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        processing_class=tokenizer,
     )
     # results = trainer.evaluate(max_length=128)
     # print(results)
