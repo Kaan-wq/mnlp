@@ -24,12 +24,16 @@ def main():
     set_seed(SEED)
 
     # Create model
-    model_config = GPTConfig()
+    model_config = GPTConfig(
+        n_embd=128,
+        n_layer=4,
+    )
     model = GPT(model_config)
     print(f"Parameters: {model.num_parameters():,}")
 
     # Create tokenizer and data collator
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    tokenizer.pad_token = tokenizer.eos_token
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False,
