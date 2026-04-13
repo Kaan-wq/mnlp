@@ -51,6 +51,7 @@ def main():
         tokenizer=tokenizer,
         mlm=False,
     )
+    print(tokenizer.vocab_size)
 
     def preprocess_function(examples):
         return tokenizer(
