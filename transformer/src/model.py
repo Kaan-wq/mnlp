@@ -10,6 +10,7 @@ from .types import AttentionType
 
 class GPT(PreTrainedModel):
     config_class = GPTConfig
+    _tied_weights_keys = []
 
     def __init__(self, config: GPTConfig) -> None:
         super().__init__(config)

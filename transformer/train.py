@@ -35,6 +35,7 @@ def main():
 
     # Create model
     model_config = GPTConfig(
+        max_seq_length=256,
         n_embd=128,
         n_layer=4,
         n_head=4,
@@ -63,6 +64,10 @@ def main():
     tokenized_datasets = raw_datasets.map(
         preprocess_function, batched=True, remove_columns=raw_datasets["train"].column_names)
 
+    total_tokens = 103_000_000
+    # tokens per batch = seq_len * batch_size * grad_acc_steps
+    effective_batch_size = 256 * 128 * 4
+
     RUN_NAME = "gpt-mha-baseline"
 
     training_args = TrainingArguments(
@@ -72,6 +77,7 @@ def main():
         save_strategy="epoch",
         load_best_model_at_end=True,
         num_train_epochs=2,
+        # max_steps=...,
         per_device_train_batch_size=128,
         per_device_eval_batch_size=128,
         gradient_accumulation_steps=4,
