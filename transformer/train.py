@@ -72,7 +72,7 @@ def main():
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
-        num_train_epochs=10,
+        num_train_epochs=3,
         per_device_train_batch_size=128,
         per_device_eval_batch_size=128,
         gradient_accumulation_steps=4,
