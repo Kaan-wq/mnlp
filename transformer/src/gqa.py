@@ -18,21 +18,20 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
         k = config.n_embd // config.n_head  # dimension of each head
 
         # Q, K, V projection matrices
-        self.queries = nn.Linear(
-            config.n_embd, config.n_embd, bias=False, device=config.device)
-        self.keys = nn.Linear(config.n_embd, config.n_kv_head * k,
-                              bias=False, device=config.device)  # only g heads in GQA
+        self.queries = nn.Linear(config.n_embd, config.n_embd, bias=False)
+        # only g heads in GQA
+        self.keys = nn.Linear(config.n_embd, config.n_kv_head * k, bias=False)
+        # only g heads in GQA
         self.values = nn.Linear(
-            config.n_embd, config.n_kv_head * k, bias=False, device=config.device)  # only g heads in GQA
+            config.n_embd, config.n_kv_head * k, bias=False)
 
-        self.out_proj = nn.Linear(
-            config.n_embd, config.n_embd, bias=False, device=config.device)
+        self.out_proj = nn.Linear(config.n_embd, config.n_embd, bias=False)
 
         self.register_buffer(
             "att_mask",
             torch.tril(
                 torch.ones(config.max_seq_length,
-                           config.max_seq_length, device=config.device)
+                           config.max_seq_length)
             ).reshape(1, 1, config.max_seq_length, config.max_seq_length)
         )
 
