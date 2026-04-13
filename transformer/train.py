@@ -37,7 +37,7 @@ def main():
     # Create model
     model_config = GPTConfig(
         n_embd=128,
-        n_layer=8,
+        n_layer=4,
         n_head=4,
         attn_type="mha",
     )
@@ -60,7 +60,7 @@ def main():
             max_length=model_config.max_seq_length
         )
 
-    raw_datasets = load_dataset("wikitext", "wikitext-2-raw-v1")
+    raw_datasets = load_dataset("wikitext", "wikitext-103-raw-v1")
     tokenized_datasets = raw_datasets.map(
         preprocess_function, batched=True, remove_columns=raw_datasets["train"].column_names)
 
