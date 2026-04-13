@@ -3,12 +3,11 @@ import numpy as np
 import torch
 import math
 import wandb
-from transformers import Trainer, DataCollatorForLanguageModeling, TrainingArguments, AutoTokenizer
+from transformers import Trainer, DataCollatorForLanguageModeling, TrainingArguments, AutoTokenizer, TrainerCallback
 from src.model import GPT
 from src.config import GPTConfig
 from datasets import load_dataset
 from dotenv import load_dotenv
-from transformers import TrainerCallback
 load_dotenv()
 
 SEED = 20
