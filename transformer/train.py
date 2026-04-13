@@ -36,7 +36,7 @@ def main():
     # Create model
     model_config = GPTConfig(
         max_seq_length=256,
-        n_embd=128,
+        n_embd=256,
         n_layer=4,
         n_head=4,
         attn_type="mha",
