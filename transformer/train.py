@@ -63,7 +63,7 @@ def main():
         lr_scheduler_type="cosine",
         warmup_ratio=0.1,
         weight_decay=0.01,
-        gradient_checkpointing=True,
+        gradient_checkpointing=False,
         metric_for_best_model="eval_loss",
         greater_is_better=False,
         dataloader_num_workers=2,
