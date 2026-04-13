@@ -26,7 +26,9 @@ def main():
     # Create model
     model_config = GPTConfig(
         n_embd=128,
-        n_layer=4,
+        n_layer=8,
+        n_head=4,
+        attn_type="mha",
     )
     model = GPT(model_config)
     print(f"Parameters: {model.num_parameters():,}")
