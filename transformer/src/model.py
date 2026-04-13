@@ -23,9 +23,6 @@ class GPT(PreTrainedModel):
         self.logits_proj = nn.Linear(
             config.n_embd, config.vocab_size, bias=False)
 
-    def num_parameters(self) -> int:
-        return sum(p.numel() for p in self.parameters())
-
     def forward(
         self,
         input_ids: torch.Tensor,

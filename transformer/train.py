@@ -31,7 +31,7 @@ def main():
         attn_type="mha",
     )
     model = GPT(model_config)
-    print(f"Parameters: {model.num_parameters():,}")
+    print(f"Parameters: {sum(p.numel() for p in model.parameters()):,}")
 
     # Create tokenizer and data collator
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
