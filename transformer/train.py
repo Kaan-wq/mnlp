@@ -2,11 +2,13 @@ import random
 import numpy as np
 import torch
 import math
+import wandb
 from transformers import Trainer, DataCollatorForLanguageModeling, TrainingArguments, AutoTokenizer
 from src.model import GPT
 from src.config import GPTConfig
-from datasets import load_dataset, concatenate_datasets, DatasetDict
+from datasets import load_dataset
 from dotenv import load_dotenv
+from transformers import TrainerCallback
 load_dotenv()
 
 SEED = 20
@@ -18,6 +20,15 @@ def set_seed(seed):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+
+class PerplexityCallback(TrainerCallback):
+    def on_evaluate(self, args, state, control, metrics, **kwargs):
+        if "eval_loss" in metrics:
+            wandb.log({
+                "perplexity": math.exp(metrics["eval_loss"]),
+                "step": state.global_step
+            })
 
 
 def main():
@@ -86,6 +97,7 @@ def main():
         eval_dataset=tokenized_datasets["validation"],
         data_collator=data_collator,
         compute_metrics=None,
+        callbacks=[PerplexityCallback()],
     )
     trainer.train()
 
