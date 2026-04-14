@@ -145,6 +145,22 @@ def main():
         compute_metrics=None,
         callbacks=[PerplexityCallback()],
     )
+
+    # ── Sanity check BEFORE training ──────────────────────────────────────
+    model.eval()
+    with torch.no_grad():
+        dummy = torch.randint(0, model_config.vocab_size, (2, 32))
+        out = model(dummy, labels=dummy)
+        print(f"Actual initial loss:    {out.loss.item():.3f}")
+        print(f"Expected (uniform):     {math.log(model_config.vocab_size):.3f}")
+        print(f"Logit mean:             {out.logits.mean().item():.4f}")
+        print(f"Logit std:              {out.logits.std().item():.4f}")
+        print(f"Logit max:              {out.logits.max().item():.4f}")
+        print(f"Any NaN in logits:      {out.logits.isnan().any().item()}")
+        print(f"Any Inf in logits:      {out.logits.isinf().any().item()}")
+    model.train()
+    # ──────────────────────────────────────────────────────────────────────
+
     trainer.train()
 
     trainer.create_model_card(
