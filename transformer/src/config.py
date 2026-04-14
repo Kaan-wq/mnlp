@@ -14,7 +14,7 @@ class GPTConfig(PreTrainedConfig):
         attn_type: str = "mha",
         n_kv_head: int = 2,
         dropout: float = 0.1,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(**kwargs)
         self.vocab_size = vocab_size
