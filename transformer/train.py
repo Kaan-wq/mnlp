@@ -37,7 +37,7 @@ def main():
     model_config = GPTConfig(
         max_seq_length=256,
         n_embd=64,
-        n_layer=8,
+        n_layer=20,
         n_head=2,
         attn_type="mha",
     )
@@ -63,10 +63,6 @@ def main():
     raw_datasets = load_dataset("wikitext", "wikitext-103-raw-v1")
     tokenized_datasets = raw_datasets.map(
         preprocess_function, batched=True, remove_columns=raw_datasets["train"].column_names)
-
-    total_tokens = 103_000_000
-    # tokens per batch = seq_len * batch_size * grad_acc_steps
-    effective_batch_size = 256 * 128 * 4
 
     RUN_NAME = "gpt-mha-baseline"
 
