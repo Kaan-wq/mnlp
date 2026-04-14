@@ -220,6 +220,7 @@ def main():
     # ─────────────────────────────────────────────────────────────────────
 
     print(f"Model dtype before train(): {next(model.parameters()).dtype}")
+    print(f"GPUs available: {torch.cuda.device_count()}")
     trainer.train()
 
     trainer.create_model_card(
