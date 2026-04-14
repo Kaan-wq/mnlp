@@ -54,7 +54,7 @@ def main():
     print(tokenizer.vocab_size)
 
     def preprocess_function(examples):
-        return tokenizer(examples["text"])
+        return tokenizer(examples["text"], truncation=False, add_special_tokens=True)
 
     def group_texts(examples):
         concatenated = {k: sum(examples[k], []) for k in examples.keys()}
