@@ -54,15 +54,25 @@ def main():
     print(tokenizer.vocab_size)
 
     def preprocess_function(examples):
-        return tokenizer(
-            examples["text"],
-            truncation=True,
-            max_length=model_config.max_seq_length
-        )
+        return tokenizer(examples["text"])
+
+    def group_texts(examples):
+        concatenated = {k: sum(examples[k], []) for k in examples.keys()}
+        total_length = len(concatenated[list(examples.keys())[0]])
+        if total_length >= model_config.max_seq_length:
+            total_length = (
+                total_length // model_config.max_seq_length) * model_config.max_seq_length
+        return {
+            k: [t[i: i + model_config.max_seq_length]
+                for i in range(0, total_length, model_config.max_seq_length)]
+            for k, t in concatenated.items()
+        }
 
     raw_datasets = load_dataset("wikitext", "wikitext-103-raw-v1")
     tokenized_datasets = raw_datasets.map(
-        preprocess_function, batched=True, remove_columns=raw_datasets["train"].column_names)
+        preprocess_function, batched=True, num_proc=4, remove_columns=raw_datasets["train"].column_names)
+    tokenized_datasets = tokenized_datasets.map(
+        group_texts, batched=True, num_proc=4)
 
     RUN_NAME = "gpt-mha-baseline"
 
@@ -72,12 +82,13 @@ def main():
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
-        num_train_epochs=2,
+        num_train_epochs=1,
         # max_steps=...,
         per_device_train_batch_size=128,
         per_device_eval_batch_size=128,
         gradient_accumulation_steps=4,
-        fp16=torch.cuda.is_available(),
+        fp16=False,
+        bf16=torch.cuda.is_available(),
         learning_rate=3e-4,
         lr_scheduler_type="cosine",
         warmup_ratio=0.1,
