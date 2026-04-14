@@ -13,7 +13,6 @@ from .types import AttentionType
 
 class GPT(PreTrainedModel):
     config_class = GPTConfig
-    _tied_weights_keys = ["logits_proj.weight"]
 
     def __init__(self, config: GPTConfig) -> None:
         super().__init__(config)
@@ -26,10 +25,24 @@ class GPT(PreTrainedModel):
         )
         self.ln_f = nn.LayerNorm(config.n_embd)
         self.logits_proj = nn.Linear(config.n_embd, config.vocab_size, bias=False)
-        self.logits_proj.weight = self.token_embd.weight  # Tie weights
 
         # Initialize weights to avoid exploding loss at the beginning of training
         self.apply(self._init_weights)
+
+        #  Tie weights
+        self.post_init()
+
+    def get_input_embeddings(self):
+        return self.token_embd
+
+    def set_input_embeddings(self, value):
+        self.token_embd = value
+
+    def get_output_embeddings(self):
+        return self.logits_proj
+
+    def set_output_embeddings(self, value):
+        self.logits_proj = value
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
