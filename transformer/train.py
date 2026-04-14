@@ -52,7 +52,7 @@ def main():
     print(f"Dataset steps: {DATASET_STEPS:,}")
 
     # Create tokenizer and data collator
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2")
     tokenizer.pad_token = tokenizer.eos_token
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
