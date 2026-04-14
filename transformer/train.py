@@ -218,6 +218,8 @@ def main():
         print(f"Any inf in loss:        {per_token_loss.isinf().any().item()}")
         print(f"Any nan in loss:        {per_token_loss.isnan().any().item()}")
     # ─────────────────────────────────────────────────────────────────────
+
+    print(f"Model dtype before train(): {next(model.parameters()).dtype}")
     trainer.train()
 
     trainer.create_model_card(
