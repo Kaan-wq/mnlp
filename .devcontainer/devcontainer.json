@@ -1,13 +1,27 @@
 {
   "name": "LLM Dev",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "postCreateCommand": "pip install poetry && poetry install --no-root",
+  "postCreateCommand": "pip install uv && uv sync",
   "remoteEnv": {
-    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
+    "UV_LINK_MODE": "copy"
   },
   "customizations": {
     "vscode": {
-      "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.ruff": "explicit",
+          "source.organizeImports.ruff": "explicit"
+        },
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        }
+      }
     }
   }
 }
