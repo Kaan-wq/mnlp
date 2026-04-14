@@ -160,8 +160,8 @@ def main():
     )
     batch = next(iter(sample_loader))
 
-    input_ids = batch["input_ids"]
-    labels = batch["labels"]
+    input_ids = batch["input_ids"].to(model.device)
+    labels = batch["labels"].to(model.device)
 
     print(f"input_ids shape:        {input_ids.shape}")
     print(f"labels shape:           {labels.shape}")
