@@ -20,7 +20,7 @@ from transformers import Trainer, TrainerCallback, TrainingArguments
 
 VOCAB_SIZE = 1000
 SEQ_LEN = 32
-GRAD_ACC_STEPS = 8
+GRAD_ACC_STEPS = 16
 
 
 # --- Minimal model ---
