@@ -1,7 +1,8 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from .config import GPTConfig
-import torch
 from .types import ATTENTION_REGISTRY, AttentionType
 
 

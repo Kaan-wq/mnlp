@@ -1,6 +1,7 @@
 from enum import Enum
-from .mha import MaskedMultiHeadSelfAttention
+
 from .gqa import MaskedGroupedQuerySelfAttention
+from .mha import MaskedMultiHeadSelfAttention
 from .mqa import MaskedMultiQuerySelfAttention
 
 

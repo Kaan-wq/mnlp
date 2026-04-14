@@ -1,6 +1,7 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
+
 from .config import GPTConfig
 
 
@@ -23,9 +24,8 @@ class MaskedMultiQuerySelfAttention(nn.Module):
         self.register_buffer(
             "att_mask",
             torch.tril(
-                torch.ones(config.max_seq_length,
-                           config.max_seq_length)
-            ).reshape(1, 1, config.max_seq_length, config.max_seq_length)
+                torch.ones(config.max_seq_length, config.max_seq_length)
+            ).reshape(1, 1, config.max_seq_length, config.max_seq_length),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -41,8 +41,9 @@ class MaskedMultiQuerySelfAttention(nn.Module):
         V = self.values(x).reshape(B, T, 1, k).transpose(1, 2)
 
         # Softmax along the 4th dim
-        A_masked = ((Q @ K.transpose(2, 3)) / (k ** 0.5)
-                    ).masked_fill(self.att_mask[:, :, :T, :T] == 0, float("-inf"))
+        A_masked = ((Q @ K.transpose(2, 3)) / (k**0.5)).masked_fill(
+            self.att_mask[:, :, :T, :T] == 0, float("-inf")
+        )
         A = F.softmax(A_masked, dim=-1)
 
         # (B, h, T, k) -> (B, T, h, k) -> (B, T, D)

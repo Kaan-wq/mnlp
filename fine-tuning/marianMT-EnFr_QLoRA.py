@@ -1,11 +1,20 @@
-import torch
 import random
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from transformers import MarianMTModel, MarianTokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainingArguments, Seq2SeqTrainer, BitsAndBytesConfig
-from datasets import load_dataset, concatenate_datasets, DatasetDict
+
 import evaluate
-from dotenv import load_dotenv
 import numpy as np
+import torch
+from datasets import DatasetDict, concatenate_datasets, load_dataset
+from dotenv import load_dotenv
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from transformers import (
+    BitsAndBytesConfig,
+    DataCollatorForSeq2Seq,
+    MarianMTModel,
+    MarianTokenizer,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+)
+
 load_dotenv()
 
 SEED = 20
@@ -23,23 +32,28 @@ def main():
     set_seed(SEED)
 
     # ==== Load and preprocess dataset ====
-    raw_datasets = load_dataset(
-        "Helsinki-NLP/opus-100", "en-fr")
+    raw_datasets = load_dataset("Helsinki-NLP/opus-100", "en-fr")
 
     merged_datasets = concatenate_datasets(
-        [raw_datasets['train'], raw_datasets['validation']])
-    merged_datasets = concatenate_datasets(
-        [merged_datasets, raw_datasets['test']])
+        [raw_datasets["train"], raw_datasets["validation"]]
+    )
+    merged_datasets = concatenate_datasets([merged_datasets, raw_datasets["test"]])
 
-    split_train_testeval = merged_datasets.train_test_split(
-        test_size=0.2, seed=SEED)
-    split_eval_test = split_train_testeval['test'].train_test_split(
-        test_size=0.5, seed=SEED)
-    split_datasets = DatasetDict({
-        'train': split_train_testeval['train'].shuffle(seed=SEED).select(range(30000)),
-        'validation': split_eval_test['train'].shuffle(seed=SEED).select(range(2000)),
-        'test': split_eval_test['test'].shuffle(seed=SEED).select(range(2000))
-    })
+    split_train_testeval = merged_datasets.train_test_split(test_size=0.2, seed=SEED)
+    split_eval_test = split_train_testeval["test"].train_test_split(
+        test_size=0.5, seed=SEED
+    )
+    split_datasets = DatasetDict(
+        {
+            "train": split_train_testeval["train"]
+            .shuffle(seed=SEED)
+            .select(range(30000)),
+            "validation": split_eval_test["train"]
+            .shuffle(seed=SEED)
+            .select(range(2000)),
+            "test": split_eval_test["test"].shuffle(seed=SEED).select(range(2000)),
+        }
+    )
 
     # ===== Quantization configuration ====
     bnb_config = BitsAndBytesConfig(
@@ -51,8 +65,7 @@ def main():
 
     checkpoint = "Helsinki-NLP/opus-mt-en-fr"
     tokenizer = MarianTokenizer.from_pretrained(checkpoint)
-    model = MarianMTModel.from_pretrained(
-        checkpoint, quantization_config=bnb_config)
+    model = MarianMTModel.from_pretrained(checkpoint, quantization_config=bnb_config)
     model = prepare_model_for_kbit_training(model)
     model.enable_input_require_grads()
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
@@ -63,29 +76,30 @@ def main():
         if isinstance(predictions, tuple):
             predictions = predictions[0]
 
-        decoded_preds = tokenizer.batch_decode(
-            predictions, skip_special_tokens=True)
+        decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
         labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-        decoded_labels = tokenizer.batch_decode(
-            labels, skip_special_tokens=True)
+        decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
         decoded_preds = [pred.strip() for pred in decoded_preds]
         decoded_labels = [[label.strip()] for label in decoded_labels]
 
-        result = metric.compute(predictions=decoded_preds,
-                                references=decoded_labels)
+        result = metric.compute(predictions=decoded_preds, references=decoded_labels)
         return {"bleu": result["score"]}
 
     def preprocess_function(examples):
-        inputs = [ex["en"] for ex in examples['translation']]
-        targets = [ex["fr"] for ex in examples['translation']]
+        inputs = [ex["en"] for ex in examples["translation"]]
+        targets = [ex["fr"] for ex in examples["translation"]]
 
         model_inputs = tokenizer(
-            inputs, text_target=targets, max_length=128, truncation=True)
+            inputs, text_target=targets, max_length=128, truncation=True
+        )
         return model_inputs
 
     tokenized_datasets = split_datasets.map(
-        preprocess_function, batched=True, remove_columns=split_datasets["train"].column_names)
+        preprocess_function,
+        batched=True,
+        remove_columns=split_datasets["train"].column_names,
+    )
 
     peft_config = LoraConfig(
         r=16,
@@ -127,8 +141,8 @@ def main():
     trainer = Seq2SeqTrainer(
         model=lora_model,
         args=training_args,
-        train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['validation'],
+        train_dataset=tokenized_datasets["train"],
+        eval_dataset=tokenized_datasets["validation"],
         data_collator=data_collator,
         compute_metrics=compute_metrics,
         processing_class=tokenizer,

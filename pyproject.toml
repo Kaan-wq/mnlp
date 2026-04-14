@@ -47,9 +47,13 @@ select = [
     "I",   # isort — import sorting
     "UP",  # pyupgrade — modern Python syntax
     "B",   # flake8-bugbear — common bugs
+    "C4",   # better comprehensions
+    "SIM",  # simplify conditions
+    "TCH",  # type-checking imports
 ]
 ignore = [
-    "E501",  # line too long — handled by formatter
+    "B006",  # mutable default arguments — common in configs
+    "SIM108", # ternary operator — sometimes less readable
 ]
 
 [tool.ruff.lint.isort]
