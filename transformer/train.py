@@ -120,7 +120,7 @@ def main():
         per_device_train_batch_size=BATCH_SIZE,
         per_device_eval_batch_size=BATCH_SIZE,
         gradient_accumulation_steps=GRAD_ACC_STEPS,
-        fp16=torch.cuda.is_available(),
+        fp16=False,
         # bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
         learning_rate=3e-4,
         lr_scheduler_type="cosine",
@@ -145,23 +145,6 @@ def main():
         compute_metrics=None,
         callbacks=[PerplexityCallback()],
     )
-
-    # ── Sanity check BEFORE training ──────────────────────────────────────
-    model.eval()
-    with torch.no_grad():
-        device = next(model.parameters()).device
-        dummy = torch.randint(0, model_config.vocab_size, (2, 32)).to(device)
-        out = model(dummy, labels=dummy)
-        print(f"Actual initial loss:    {out.loss.item():.3f}")
-        print(f"Expected (uniform):     {math.log(model_config.vocab_size):.3f}")
-        print(f"Logit mean:             {out.logits.mean().item():.4f}")
-        print(f"Logit std:              {out.logits.std().item():.4f}")
-        print(f"Logit max:              {out.logits.max().item():.4f}")
-        print(f"Any NaN in logits:      {out.logits.isnan().any().item()}")
-        print(f"Any Inf in logits:      {out.logits.isinf().any().item()}")
-    model.train()
-    # ──────────────────────────────────────────────────────────────────────
-
     trainer.train()
 
     trainer.create_model_card(
