@@ -1,3 +1,5 @@
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -25,6 +27,25 @@ class GPT(PreTrainedModel):
         self.ln_f = nn.LayerNorm(config.n_embd)
         self.logits_proj = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         self.logits_proj.weight = self.token_embd.weight  # Tie weights
+
+        # Initialize weights to avoid exploding loss at the beginning of training
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module: nn.Module) -> None:
+        if isinstance(module, nn.Linear):
+            # Scaled init for residual projections (fc2, attn out_proj)
+            # prevents residual stream variance from growing with depth
+            std = 0.02
+            if hasattr(module, "_is_residual_proj"):
+                std = 0.02 / math.sqrt(2 * self.config.n_layer)
+            nn.init.normal_(module.weight, mean=0.0, std=std)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            nn.init.normal_(module.weight, mean=0.0, std=0.02)
+        elif isinstance(module, nn.LayerNorm):
+            nn.init.ones_(module.weight)
+            nn.init.zeros_(module.bias)
 
     def forward(
         self, input_ids: torch.Tensor, labels: torch.Tensor | None = None, **kwargs

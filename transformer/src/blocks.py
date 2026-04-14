@@ -11,6 +11,7 @@ class MLP(nn.Module):
         super().__init__()
         self.fc1 = nn.Linear(config.n_embd, 4 * config.n_embd)
         self.fc2 = nn.Linear(4 * config.n_embd, config.n_embd)
+        self.fc2._is_residual_proj = True  # mark for scaled init
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.fc2(F.gelu(self.fc1(x)))

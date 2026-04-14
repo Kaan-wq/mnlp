@@ -60,6 +60,8 @@ def main():
         attn_type="mha",
     )
     model = GPT(model_config)
+    print(f"Expected Initial Loss: {math.log(model_config.vocab_size):.3f}")
+
     non_embd_params = model.num_parameters(exclude_embeddings=True)
     print(f"Non-embedding parameters: {non_embd_params:,}")
     print(f"Tokens needed (Chinchilla): {non_embd_params * 20:,}")

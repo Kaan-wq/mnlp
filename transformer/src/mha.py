@@ -17,6 +17,7 @@ class MaskedMultiHeadSelfAttention(nn.Module):
         self.values = nn.Linear(config.n_embd, config.n_embd, bias=False)
 
         self.out_proj = nn.Linear(config.n_embd, config.n_embd, bias=False)
+        self.out_proj._is_residual_proj = True  # mark for scaled init
 
         self.register_buffer(
             "att_mask",
