@@ -46,12 +46,10 @@ def main():
 
     RUN_NAME = "gpt-mha-baseline"
     BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 64, 8, 256
-    DATASET_TOKENS = 103_000_000
     TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
-    STEPS = DATASET_TOKENS // TOKENS_PER_STEP
-    print(f"Estimated steps: {STEPS:,}")
-    # Model with X parameters should be trained on Y ≃ 20 * X tokens
-    # https://arxiv.org/abs/2203.15556
+    DATASET_TOKENS = 103_000_000
+    DATASET_STEPS = DATASET_TOKENS // TOKENS_PER_STEP
+    print(f"Dataset steps: {DATASET_STEPS:,}")
 
     # Create model
     model_config = GPTConfig(
@@ -65,6 +63,12 @@ def main():
     non_embd_params = model.num_parameters(exclude_embeddings=True)
     print(f"Non-embedding parameters: {non_embd_params:,}")
     print(f"Tokens needed (Chinchilla): {non_embd_params * 20:,}")
+
+    STEPS = non_embd_params * 20 // TOKENS_PER_STEP
+    print(f"Estimated steps: {STEPS:,}")
+
+    # Model with X parameters should be trained on Y ≃ 20 * X tokens
+    # https://arxiv.org/abs/2203.15556
 
     # Create tokenizer and data collator
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
