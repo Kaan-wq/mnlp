@@ -33,16 +33,19 @@ class GPT(PreTrainedModel):
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
-            # Scaled init for residual projections (fc2, attn out_proj)
-            # prevents residual stream variance from growing with depth
             std = 0.02
             if hasattr(module, "_is_residual_proj"):
                 std = 0.02 / math.sqrt(2 * self.config.n_layer)
-            nn.init.normal_(module.weight, mean=0.0, std=std)
+            nn.init.trunc_normal_(
+                module.weight, mean=0.0, std=std, a=-3 * std, b=3 * std
+            )
             if module.bias is not None:
                 nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            std = 0.02
+            nn.init.trunc_normal_(
+                module.weight, mean=0.0, std=std, a=-3 * std, b=3 * std
+            )
         elif isinstance(module, nn.LayerNorm):
             nn.init.ones_(module.weight)
             nn.init.zeros_(module.bias)
