@@ -1,13 +1,22 @@
+import math
 import random
+
 import numpy as np
 import torch
-import math
 import wandb
-from transformers import Trainer, DataCollatorForLanguageModeling, TrainingArguments, AutoTokenizer, TrainerCallback
-from src.model import GPT
-from src.config import GPTConfig
 from datasets import load_dataset
 from dotenv import load_dotenv
+from transformers import (
+    AutoTokenizer,
+    DataCollatorForLanguageModeling,
+    Trainer,
+    TrainerCallback,
+    TrainingArguments,
+)
+
+from src.config import GPTConfig
+from src.model import GPT
+
 load_dotenv()
 
 SEED = 20
@@ -24,25 +33,38 @@ def set_seed(seed):
 class PerplexityCallback(TrainerCallback):
     def on_evaluate(self, args, state, control, metrics, **kwargs):
         if "eval_loss" in metrics:
-            wandb.log({
-                "perplexity": math.exp(metrics["eval_loss"]),
-                "step": state.global_step
-            })
+            wandb.log(
+                {
+                    "eval/perplexity": math.exp(metrics["eval_loss"]),
+                    "step": state.global_step,
+                }
+            )
 
 
 def main():
     set_seed(SEED)
 
+    RUN_NAME = "gpt-mha-baseline"
+    BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 128, 4, 256
+    DATASET_TOKENS = 103_000_000
+    TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
+    STEPS = DATASET_TOKENS // TOKENS_PER_STEP
+    print(f"Estimated steps: {STEPS:,}")
+    # Model with X parameters should be trained on Y ≃ 20 * X tokens
+    # https://arxiv.org/abs/2203.15556
+
     # Create model
     model_config = GPTConfig(
-        max_seq_length=256,
+        max_seq_length=MAX_SEQ_LEN,
         n_embd=128,
         n_layer=6,
         n_head=2,
         attn_type="mha",
     )
     model = GPT(model_config)
-    print(f"Parameters: {sum(p.numel() for p in model.parameters()):,}")
+    non_embd_params = model.num_parameters(exclude_embeddings=True)
+    print(f"Non-embedding parameters: {non_embd_params:,}")
+    print(f"Tokens needed (Chinchilla): {non_embd_params * 20:,}")
 
     # Create tokenizer and data collator
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
@@ -57,24 +79,28 @@ def main():
         return tokenizer(examples["text"], truncation=False, add_special_tokens=True)
 
     def group_texts(examples):
-        concatenated = {k: sum(examples[k], []) for k in examples.keys()}
+        concatenated = {k: sum(examples[k], []) for k in examples}
         total_length = len(concatenated[list(examples.keys())[0]])
         if total_length >= model_config.max_seq_length:
             total_length = (
-                total_length // model_config.max_seq_length) * model_config.max_seq_length
+                total_length // model_config.max_seq_length
+            ) * model_config.max_seq_length
         return {
-            k: [t[i: i + model_config.max_seq_length]
-                for i in range(0, total_length, model_config.max_seq_length)]
+            k: [
+                t[i : i + model_config.max_seq_length]
+                for i in range(0, total_length, model_config.max_seq_length)
+            ]
             for k, t in concatenated.items()
         }
 
     raw_datasets = load_dataset("wikitext", "wikitext-103-raw-v1")
     tokenized_datasets = raw_datasets.map(
-        preprocess_function, batched=True, num_proc=2, remove_columns=raw_datasets["train"].column_names)
-    tokenized_datasets = tokenized_datasets.map(
-        group_texts, batched=True, num_proc=2)
-
-    RUN_NAME = "gpt-mha-baseline"
+        preprocess_function,
+        batched=True,
+        num_proc=4,
+        remove_columns=raw_datasets["train"].column_names,
+    )
+    tokenized_datasets = tokenized_datasets.map(group_texts, batched=True, num_proc=4)
 
     training_args = TrainingArguments(
         output_dir=RUN_NAME,
@@ -82,16 +108,16 @@ def main():
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
-        num_train_epochs=1,
-        # max_steps=...,
-        per_device_train_batch_size=128,
-        per_device_eval_batch_size=128,
-        gradient_accumulation_steps=4,
+        num_train_epochs=1,  # overriden by max_steps
+        max_steps=STEPS,
+        per_device_train_batch_size=BATCH_SIZE,
+        per_device_eval_batch_size=BATCH_SIZE,
+        gradient_accumulation_steps=GRAD_ACC_STEPS,
         fp16=False,
         bf16=torch.cuda.is_available(),
         learning_rate=3e-4,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.1,
+        warmup_steps=int(STEPS * 0.1),  # 10% of steps for warmup
         weight_decay=0.01,
         gradient_checkpointing=False,
         metric_for_best_model="eval_loss",
