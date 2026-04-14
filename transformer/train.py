@@ -145,6 +145,54 @@ def main():
         compute_metrics=None,
         callbacks=[PerplexityCallback()],
     )
+
+    # ── Real batch sanity check ───────────────────────────────────────────
+    import torch.nn.functional as F
+    from torch.utils.data import DataLoader
+
+    model.eval()
+    model = model.float()  # force float32 regardless of training precision
+
+    sample_loader = DataLoader(
+        tokenized_datasets["train"],
+        batch_size=4,
+        collate_fn=data_collator,
+    )
+    batch = next(iter(sample_loader))
+
+    input_ids = batch["input_ids"]
+    labels = batch["labels"]
+
+    print(f"input_ids shape:        {input_ids.shape}")
+    print(f"labels shape:           {labels.shape}")
+    print(
+        f"input_ids min/max:      {input_ids.min().item()} / {input_ids.max().item()}"
+    )
+    print(f"labels unique values:   {labels.unique().numel()} unique tokens")
+    print(f"labels has -100:        {(labels == -100).any().item()}")
+    print(f"fraction -100:          {(labels == -100).float().mean().item():.3f}")
+
+    with torch.no_grad():
+        out = model(input_ids, labels=labels)
+        print(f"\nLoss on real batch:     {out.loss.item():.3f}")
+        print(f"Expected (uniform):     {math.log(model_config.vocab_size):.3f}")
+
+        shift_logits = out.logits[..., :-1, :].contiguous()
+        shift_labels = labels[..., 1:].contiguous()
+
+        # Compute loss manually token by token to check for outliers
+        per_token_loss = F.cross_entropy(
+            shift_logits.view(-1, shift_logits.size(-1)),
+            shift_labels.view(-1),
+            reduction="none",
+            ignore_index=-100,
+        )
+        print(f"\nPer-token loss mean:    {per_token_loss.mean().item():.3f}")
+        print(f"Per-token loss max:     {per_token_loss.max().item():.3f}")
+        print(f"Per-token loss min:     {per_token_loss.min().item():.3f}")
+        print(f"Any inf in loss:        {per_token_loss.isinf().any().item()}")
+        print(f"Any nan in loss:        {per_token_loss.isnan().any().item()}")
+    # ─────────────────────────────────────────────────────────────────────
     trainer.train()
 
     trainer.create_model_card(
