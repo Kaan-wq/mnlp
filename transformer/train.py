@@ -111,7 +111,8 @@ def main():
     training_args = TrainingArguments(
         output_dir=RUN_NAME,
         logging_steps=10,
-        eval_strategy="epoch",
+        eval_strategy="steps",
+        eval_steps=int(STEPS * 0.1),  # evaluate every 10% of steps
         save_strategy="epoch",
         load_best_model_at_end=True,
         num_train_epochs=1,  # overriden by max_steps
