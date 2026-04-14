@@ -41,6 +41,31 @@ class PerplexityCallback(TrainerCallback):
             )
 
 
+class Step1DebugCallback(TrainerCallback):
+    def on_step_begin(self, args, state, control, **kwargs):
+        if state.global_step == 0:
+            self._debug = True
+
+    def on_step_end(self, args, state, control, model=None, **kwargs):
+        if state.global_step == 1:
+            print("\n=== STEP 1 DEBUG ===")
+            print(f"Model dtype:        {next(model.parameters()).dtype}")
+            print(f"Model device:       {next(model.parameters()).device}")
+            for name, p in model.named_parameters():
+                if p.grad is not None:
+                    print(
+                        f"Grad {name[:40]:40s} norm={p.grad.norm():.4f} "
+                        f"has_nan={p.grad.isnan().any().item()}"
+                    )
+                    break  # just the first one
+
+
+class Step1LossCallback(TrainerCallback):
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if state.global_step <= 3:
+            print(f"\nStep {state.global_step} raw logs: {logs}")
+
+
 def main():
     set_seed(SEED)
 
@@ -143,7 +168,7 @@ def main():
         eval_dataset=tokenized_datasets["validation"],
         data_collator=data_collator,
         compute_metrics=None,
-        callbacks=[PerplexityCallback()],
+        callbacks=[PerplexityCallback(), Step1DebugCallback(), Step1LossCallback()],
     )
 
     # ── Real batch sanity check ───────────────────────────────────────────
