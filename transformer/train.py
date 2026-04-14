@@ -120,8 +120,8 @@ def main():
         per_device_train_batch_size=BATCH_SIZE,
         per_device_eval_batch_size=BATCH_SIZE,
         gradient_accumulation_steps=GRAD_ACC_STEPS,
-        fp16=torch.cuda.is_available() and torch.cuda.is_fp16_supported(),
-        bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
+        fp16=torch.cuda.is_available(),
+        # bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
         learning_rate=3e-4,
         lr_scheduler_type="cosine",
         warmup_steps=int(STEPS * 0.1),  # 10% of steps for warmup
