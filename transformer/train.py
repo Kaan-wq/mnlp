@@ -149,7 +149,8 @@ def main():
     # ── Sanity check BEFORE training ──────────────────────────────────────
     model.eval()
     with torch.no_grad():
-        dummy = torch.randint(0, model_config.vocab_size, (2, 32))
+        device = next(model.parameters()).device
+        dummy = torch.randint(0, model_config.vocab_size, (2, 32)).to(device)
         out = model(dummy, labels=dummy)
         print(f"Actual initial loss:    {out.loss.item():.3f}")
         print(f"Expected (uniform):     {math.log(model_config.vocab_size):.3f}")
