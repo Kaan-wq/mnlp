@@ -51,14 +51,16 @@ class GPT(PreTrainedModel):
             nn.init.zeros_(module.bias)
 
     def forward(
-        self, input_ids: torch.Tensor, labels: torch.Tensor | None = None
+        self,
+        input_ids: torch.Tensor,
+        labels: torch.Tensor | None = None,
+        num_items_in_batch: int | None = None,
+        **kwargs,
     ) -> CausalLMOutput:
         pos = torch.arange(input_ids.size(1), device=input_ids.device).unsqueeze(0)
         x = self.token_embd(input_ids) + self.pos_embd(pos)
-
         for block in self.transformer_blocks:
             x = block(x)
-
         logits = self.logits_proj(self.ln_f(x))
 
         loss = None
@@ -68,6 +70,9 @@ class GPT(PreTrainedModel):
             loss = F.cross_entropy(
                 shift_logits.view(-1, shift_logits.size(-1)),
                 shift_labels.view(-1),
+                reduction="sum" if num_items_in_batch is not None else "mean",
             )
+            if num_items_in_batch is not None:
+                loss = loss / num_items_in_batch
 
         return CausalLMOutput(loss=loss, logits=logits)
