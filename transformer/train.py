@@ -51,8 +51,18 @@ def main():
     DATASET_STEPS = DATASET_TOKENS // TOKENS_PER_STEP
     print(f"Dataset steps: {DATASET_STEPS:,}")
 
+    # Create tokenizer and data collator
+    tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    tokenizer.pad_token = tokenizer.eos_token
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer,
+        mlm=False,
+    )
+    print(tokenizer.vocab_size)
+
     # Create model
     model_config = GPTConfig(
+        vocab_size=tokenizer.vocab_size,
         max_seq_length=MAX_SEQ_LEN,
         n_embd=128,
         n_layer=6,
@@ -71,15 +81,6 @@ def main():
 
     # Model with X parameters should be trained on Y ≃ 20 * X tokens
     # https://arxiv.org/abs/2203.15556
-
-    # Create tokenizer and data collator
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
-    tokenizer.pad_token = tokenizer.eos_token
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer,
-        mlm=False,
-    )
-    print(tokenizer.vocab_size)
 
     def preprocess_function(examples):
         return tokenizer(examples["text"], truncation=False, add_special_tokens=True)
@@ -119,8 +120,8 @@ def main():
         per_device_train_batch_size=BATCH_SIZE,
         per_device_eval_batch_size=BATCH_SIZE,
         gradient_accumulation_steps=GRAD_ACC_STEPS,
-        fp16=False,
-        bf16=torch.cuda.is_available(),
+        fp16=torch.cuda.is_available() and torch.cuda.is_fp16_supported(),
+        bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
         learning_rate=3e-4,
         lr_scheduler_type="cosine",
         warmup_steps=int(STEPS * 0.1),  # 10% of steps for warmup
