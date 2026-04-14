@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from transformers import Trainer, TrainerCallback, TrainingArguments
+from transformers.modeling_outputs import CausalLMOutput
 
 VOCAB_SIZE = 1000
 SEQ_LEN = 32
@@ -38,7 +39,6 @@ class TinyLM(nn.Module):
                 logits.view(-1, VOCAB_SIZE),
                 labels.view(-1),
             )
-        from transformers.modeling_outputs import CausalLMOutput
 
         return CausalLMOutput(loss=loss, logits=logits)
 
