@@ -10,7 +10,7 @@ from .types import AttentionType
 
 class GPT(PreTrainedModel):
     config_class = GPTConfig
-    _tied_weights_keys = []
+    _tied_weights_keys = ["logits_proj.weight"]
 
     def __init__(self, config: GPTConfig) -> None:
         super().__init__(config)
@@ -23,6 +23,7 @@ class GPT(PreTrainedModel):
         self.ln_f = nn.LayerNorm(config.n_embd)
         self.logits_proj = nn.Linear(
             config.n_embd, config.vocab_size, bias=False)
+        self.logits_proj.weight = self.token_embd.weight  # Tie weights
 
     def forward(
         self,
