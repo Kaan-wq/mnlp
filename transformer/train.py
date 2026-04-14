@@ -113,7 +113,8 @@ def main():
         logging_steps=10,
         eval_strategy="steps",
         eval_steps=int(STEPS * 0.1),  # evaluate every 10% of steps
-        save_strategy="epoch",
+        save_strategy="steps",
+        save_steps=int(STEPS * 0.1),  # save every 10% of steps
         load_best_model_at_end=True,
         num_train_epochs=1,  # overriden by max_steps
         max_steps=STEPS,
