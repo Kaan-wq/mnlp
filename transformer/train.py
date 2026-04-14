@@ -70,9 +70,9 @@ def main():
 
     raw_datasets = load_dataset("wikitext", "wikitext-103-raw-v1")
     tokenized_datasets = raw_datasets.map(
-        preprocess_function, batched=True, num_proc=4, remove_columns=raw_datasets["train"].column_names)
+        preprocess_function, batched=True, num_proc=2, remove_columns=raw_datasets["train"].column_names)
     tokenized_datasets = tokenized_datasets.map(
-        group_texts, batched=True, num_proc=4)
+        group_texts, batched=True, num_proc=2)
 
     RUN_NAME = "gpt-mha-baseline"
 
