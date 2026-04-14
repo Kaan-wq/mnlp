@@ -51,7 +51,7 @@ class GPT(PreTrainedModel):
             nn.init.zeros_(module.bias)
 
     def forward(
-        self, input_ids: torch.Tensor, labels: torch.Tensor | None = None, **kwargs
+        self, input_ids: torch.Tensor, labels: torch.Tensor | None = None
     ) -> CausalLMOutput:
         pos = torch.arange(input_ids.size(1), device=input_ids.device).unsqueeze(0)
         x = self.token_embd(input_ids) + self.pos_embd(pos)
