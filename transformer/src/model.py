@@ -69,19 +69,5 @@ class GPT(PreTrainedModel):
                 shift_logits.view(-1, shift_logits.size(-1)),
                 shift_labels.view(-1),
             )
-            # ADD THIS
-            if not hasattr(self, "_forward_count"):
-                self._forward_count = 0
-            self._forward_count += 1
-            if self._forward_count <= 3:
-                print(f"\n[forward #{self._forward_count}]")
-                print(f"  input_ids.device:   {input_ids.device}")
-                print(f"  labels.device:      {labels.device}")
-                print(f"  input_ids.shape:    {input_ids.shape}")
-                print(
-                    f"  shift_labels range: {shift_labels.min()} / {shift_labels.max()}"
-                )
-                print(f"  loss value:         {loss.item():.4f}")
-                print(f"  loss shape:         {loss.shape}")
 
         return CausalLMOutput(loss=loss, logits=logits)

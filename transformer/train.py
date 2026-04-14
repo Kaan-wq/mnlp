@@ -18,7 +18,6 @@ from src.config import GPTConfig
 from src.model import GPT
 
 load_dotenv()
-
 SEED = 20
 
 
@@ -39,31 +38,6 @@ class PerplexityCallback(TrainerCallback):
                     "step": state.global_step,
                 }
             )
-
-
-class Step1DebugCallback(TrainerCallback):
-    def on_step_begin(self, args, state, control, **kwargs):
-        if state.global_step == 0:
-            self._debug = True
-
-    def on_step_end(self, args, state, control, model=None, **kwargs):
-        if state.global_step == 1:
-            print("\n=== STEP 1 DEBUG ===")
-            print(f"Model dtype:        {next(model.parameters()).dtype}")
-            print(f"Model device:       {next(model.parameters()).device}")
-            for name, p in model.named_parameters():
-                if p.grad is not None:
-                    print(
-                        f"Grad {name[:40]:40s} norm={p.grad.norm():.4f} "
-                        f"has_nan={p.grad.isnan().any().item()}"
-                    )
-                    break  # just the first one
-
-
-class Step1LossCallback(TrainerCallback):
-    def on_log(self, args, state, control, logs=None, **kwargs):
-        if state.global_step <= 3:
-            print(f"\nStep {state.global_step} raw logs: {logs}")
 
 
 def main():
@@ -168,59 +142,8 @@ def main():
         eval_dataset=tokenized_datasets["validation"],
         data_collator=data_collator,
         compute_metrics=None,
-        callbacks=[PerplexityCallback(), Step1DebugCallback(), Step1LossCallback()],
+        callbacks=[PerplexityCallback()],
     )
-
-    # ── Real batch sanity check ───────────────────────────────────────────
-    import torch.nn.functional as F
-    from torch.utils.data import DataLoader
-
-    model.eval()
-    model = model.float()  # force float32 regardless of training precision
-
-    sample_loader = DataLoader(
-        tokenized_datasets["train"],
-        batch_size=4,
-        collate_fn=data_collator,
-    )
-    batch = next(iter(sample_loader))
-
-    input_ids = batch["input_ids"].to(model.device)
-    labels = batch["labels"].to(model.device)
-
-    print(f"input_ids shape:        {input_ids.shape}")
-    print(f"labels shape:           {labels.shape}")
-    print(
-        f"input_ids min/max:      {input_ids.min().item()} / {input_ids.max().item()}"
-    )
-    print(f"labels unique values:   {labels.unique().numel()} unique tokens")
-    print(f"labels has -100:        {(labels == -100).any().item()}")
-    print(f"fraction -100:          {(labels == -100).float().mean().item():.3f}")
-
-    with torch.no_grad():
-        out = model(input_ids, labels=labels)
-        print(f"\nLoss on real batch:     {out.loss.item():.3f}")
-        print(f"Expected (uniform):     {math.log(model_config.vocab_size):.3f}")
-
-        shift_logits = out.logits[..., :-1, :].contiguous()
-        shift_labels = labels[..., 1:].contiguous()
-
-        # Compute loss manually token by token to check for outliers
-        per_token_loss = F.cross_entropy(
-            shift_logits.view(-1, shift_logits.size(-1)),
-            shift_labels.view(-1),
-            reduction="none",
-            ignore_index=-100,
-        )
-        print(f"\nPer-token loss mean:    {per_token_loss.mean().item():.3f}")
-        print(f"Per-token loss max:     {per_token_loss.max().item():.3f}")
-        print(f"Per-token loss min:     {per_token_loss.min().item():.3f}")
-        print(f"Any inf in loss:        {per_token_loss.isinf().any().item()}")
-        print(f"Any nan in loss:        {per_token_loss.isnan().any().item()}")
-    # ─────────────────────────────────────────────────────────────────────
-
-    print(f"Model dtype before train(): {next(model.parameters()).dtype}")
-    print(f"GPUs available: {torch.cuda.device_count()}")
     trainer.train()
 
     trainer.create_model_card(
