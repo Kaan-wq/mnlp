@@ -8,7 +8,6 @@ from transformers.modeling_outputs import CausalLMOutput
 
 from .blocks import TransformerBlock
 from .config import GPTConfig
-from .types import AttentionType
 
 
 class GPT(PreTrainedModel):
@@ -17,11 +16,10 @@ class GPT(PreTrainedModel):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__(config)
 
-        attn_type = AttentionType(config.attn_type)
         self.pos_embd = nn.Embedding(config.max_seq_length, config.n_embd)
         self.token_embd = nn.Embedding(config.vocab_size, config.n_embd)
         self.transformer_blocks = nn.ModuleList(
-            [TransformerBlock(config, attn_type) for _ in range(config.n_layer)]
+            [TransformerBlock(config) for _ in range(config.n_layer)]
         )
         self.ln_f = nn.LayerNorm(config.n_embd)
         self.logits_proj = nn.Linear(config.n_embd, config.vocab_size, bias=False)

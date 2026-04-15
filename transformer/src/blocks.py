@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .config import GPTConfig
-from .types import ATTENTION_REGISTRY, AttentionType
+from .gqa import MaskedGroupedQuerySelfAttention
 
 
 class MLP(nn.Module):
@@ -18,11 +18,11 @@ class MLP(nn.Module):
 
 
 class TransformerBlock(nn.Module):
-    def __init__(self, config: GPTConfig, attn_type: AttentionType) -> None:
+    def __init__(self, config: GPTConfig) -> None:
         super().__init__()
         self.ln1 = nn.LayerNorm(config.n_embd)
         self.ln2 = nn.LayerNorm(config.n_embd)
-        self.attn = ATTENTION_REGISTRY[attn_type](config)
+        self.attn = MaskedGroupedQuerySelfAttention(config)
         self.mlp = MLP(config)
         self.dropout = nn.Dropout(config.dropout)
 

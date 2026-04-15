@@ -44,7 +44,7 @@ def main():
     set_seed(SEED)
 
     RUN_NAME = "gpt-mha-baseline"
-    BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 32, 16, 256
+    BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 64, 8, 128
     TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
     DATASET_TOKENS = 103_000_000
     STEPS_DATASET = DATASET_TOKENS // TOKENS_PER_STEP
@@ -62,11 +62,10 @@ def main():
     model_config = GPTConfig(
         vocab_size=tokenizer.vocab_size,
         max_seq_length=MAX_SEQ_LEN,
-        n_embd=128,
-        n_layer=20,
-        n_head=8,
-        attn_type="mha",  # ["mha", "mqa", "gqa"]
-        n_kv_head=2,  # only used for "gqa"
+        n_embd=64,
+        n_layer=8,
+        n_head=4,
+        n_kv_head=4,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
         dropout=0.1,
     )
     model = GPT(model_config)

@@ -7,12 +7,11 @@ class GPTConfig(PreTrainedConfig):
     def __init__(
         self,
         vocab_size: int = 50257,
-        max_seq_length: int = 64,
+        max_seq_length: int = 128,
         n_embd: int = 64,
         n_layer: int = 4,
-        n_head: int = 2,
-        attn_type: str = "mha",
-        n_kv_head: int = 2,
+        n_head: int = 4,
+        n_kv_head: int = 4,
         dropout: float = 0.1,
         **kwargs,
     ) -> None:
@@ -22,6 +21,5 @@ class GPTConfig(PreTrainedConfig):
         self.n_embd = n_embd
         self.n_layer = n_layer
         self.n_head = n_head
-        self.attn_type = attn_type
         self.n_kv_head = n_kv_head
         self.dropout = dropout
