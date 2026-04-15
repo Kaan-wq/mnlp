@@ -37,7 +37,9 @@ class GPT(PreTrainedModel):
         self.token_embd = value
 
     def get_output_embeddings(self):
-        return self.logits_proj
+        if self.config.tie_embeddings:
+            return self.logits_proj
+        return None
 
     def set_output_embeddings(self, value):
         self.logits_proj = value

@@ -66,19 +66,26 @@ def main():
         n_head=4,
         n_kv_head=4,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
         norm_type="layernorm",
+        tie_embeddings=False,
         dropout=0.1,
     )
     model = GPT(model_config)
-    print(f"Expected Initial Loss: {math.log(model_config.vocab_size):.3f}")
 
     non_embd_params = model.num_parameters(exclude_embeddings=True)
-    print(f"Non-embedding parameters: {non_embd_params:,}")
-    print(f"Tokens needed (Chinchilla): {non_embd_params * 20:,}")
 
     STEPS_OPT = non_embd_params * 20 // TOKENS_PER_STEP
-    print(f"Estimated optimal number of steps: {STEPS_OPT:,}")
-    print(f"Dataset steps: {STEPS_DATASET:,}")
     STEPS = min(STEPS_OPT, STEPS_DATASET)
+
+    print()
+    print("=" * 45)
+    print(f"  Expected initial loss       {math.log(model_config.vocab_size):.3f}")
+    print(f"  Total parameters            {model.num_parameters():,}")
+    print(f"  Non-embedding parameters    {non_embd_params:,}")
+    print(f"  Chinchilla tokens needed    {non_embd_params * 20:,}")
+    print(f"  Optimal steps               {STEPS_OPT:,}")
+    print(f"  Dataset steps               {STEPS_DATASET:,}")
+    print("=" * 45)
+    print()
 
     # Model with X parameters should be trained on Y ≃ 20 * X tokens
     # https://arxiv.org/abs/2203.15556
