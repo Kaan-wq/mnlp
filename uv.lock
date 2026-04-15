@@ -2017,7 +2017,6 @@ dependencies = [
     { name = "huggingface-hub" },
     { name = "ipykernel" },
     { name = "jupyter" },
-    { name = "manim" },
     { name = "peft" },
     { name = "python-dotenv" },
     { name = "sacrebleu" },
@@ -2031,6 +2030,11 @@ dependencies = [
     { name = "wandb" },
 ]
 
+[package.optional-dependencies]
+viz = [
+    { name = "manim" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.13.0,<2.0.0" },
@@ -2042,7 +2046,7 @@ requires-dist = [
     { name = "huggingface-hub", specifier = ">=1.9.0" },
     { name = "ipykernel", specifier = ">=7.2.0,<8.0.0" },
     { name = "jupyter", specifier = ">=1.1.1" },
-    { name = "manim", specifier = ">=0.20.1" },
+    { name = "manim", marker = "extra == 'viz'" },
     { name = "peft", specifier = ">=0.18.1,<0.19.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "sacrebleu", specifier = ">=2.6.0,<3.0.0" },
@@ -2055,6 +2059,7 @@ requires-dist = [
     { name = "trl", specifier = ">=1.0.0,<2.0.0" },
     { name = "wandb", specifier = ">=0.25.1" },
 ]
+provides-extras = ["viz"]
 
 [[package]]
 name = "moderngl"
