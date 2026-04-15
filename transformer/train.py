@@ -65,7 +65,7 @@ def main():
         n_embd=128,
         n_layer=20,
         n_head=8,
-        attn_type="mqa",  # ["mha", "mqa", "gqa"]
+        attn_type="mha",  # ["mha", "mqa", "gqa"]
         n_kv_head=2,  # ignored for MHA and MQA
         dropout=0.1,
     )
