@@ -43,7 +43,7 @@ class PerplexityCallback(TrainerCallback):
 def main():
     set_seed(SEED)
 
-    RUN_NAME = "gpt-mha-baseline+RMSNorm"
+    RUN_NAME = "gpt-mha-baselineRMSNorm"
     BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 128, 4, 128
     TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
     DATASET_TOKENS = 103_000_000
