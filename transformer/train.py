@@ -63,10 +63,10 @@ def main():
         vocab_size=tokenizer.vocab_size,
         max_seq_length=MAX_SEQ_LEN,
         n_embd=128,
-        n_layer=4,
-        n_head=2,
-        attn_type="mqa",
-        n_kv_head=2,
+        n_layer=10,
+        n_head=8,
+        attn_type="mha",  # ["mha", "mqa", "gqa"]
+        n_kv_head=2,  # ignored for MHA and MQA
         dropout=0.1,
     )
     model = GPT(model_config)
