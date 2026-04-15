@@ -31,10 +31,6 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
         # only g heads in GQA
         self.values = nn.Linear(config.n_embd, config.n_kv_head * self.k, bias=False)
 
-        if config.pos_enc_type == "relative":
-            self.cos_embd = torch.cos(self.angle_matrix).float()
-            self.sin_embd = torch.sin(self.angle_matrix).float()
-
         self.out_proj = nn.Linear(config.n_embd, config.n_embd, bias=False)
         self.out_proj._is_residual_proj = True  # mark for scaled init
 
