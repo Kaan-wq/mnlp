@@ -66,6 +66,7 @@ def main():
         n_layer=8,
         n_head=4,
         n_kv_head=4,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
+        norm_type="layernorm",
         dropout=0.1,
     )
     model = GPT(model_config)

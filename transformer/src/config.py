@@ -12,6 +12,7 @@ class GPTConfig(PreTrainedConfig):
         n_layer: int = 4,
         n_head: int = 4,
         n_kv_head: int = 4,
+        norm_type: str = "rmsnorm",  # ["layernorm", "rmsnorm"]
         dropout: float = 0.1,
         **kwargs,
     ) -> None:
@@ -22,4 +23,5 @@ class GPTConfig(PreTrainedConfig):
         self.n_layer = n_layer
         self.n_head = n_head
         self.n_kv_head = n_kv_head
+        self.norm_type = norm_type
         self.dropout = dropout
