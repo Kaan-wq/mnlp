@@ -62,7 +62,7 @@ def main():
         vocab_size=tokenizer.vocab_size,
         max_seq_length=MAX_SEQ_LEN,
         n_embd=64,
-        n_layer=8,
+        n_layer=6,
         n_head=4,
         n_kv_head=4,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
         norm_type="layernorm",
