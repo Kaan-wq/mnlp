@@ -65,8 +65,8 @@ def main():
         n_embd=128,
         n_layer=20,
         n_head=8,
-        attn_type="mha",  # ["mha", "mqa", "gqa"]
-        n_kv_head=2,  # ignored for MHA and MQA
+        attn_type="mqa",  # ["mha", "mqa", "gqa"]
+        n_kv_head=2,  # only used for "gqa"
         dropout=0.1,
     )
     model = GPT(model_config)
