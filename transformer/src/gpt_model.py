@@ -16,7 +16,10 @@ class GPT(PreTrainedModel):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__(config)
 
-        self.pos_embd = nn.Embedding(config.max_seq_length, config.n_embd)
+        if config.pos_enc_type == "absolute":
+            self.pos_embd = nn.Embedding(config.max_seq_length, config.n_embd)
+        else:
+            self.pos_embd = None
         self.token_embd = nn.Embedding(config.vocab_size, config.n_embd)
         self.transformer_blocks = nn.ModuleList(
             [TransformerBlock(config) for _ in range(config.n_layer)]
@@ -60,6 +63,8 @@ class GPT(PreTrainedModel):
         elif isinstance(module, nn.LayerNorm):
             nn.init.ones_(module.weight)
             nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.RMSNorm):
+            nn.init.ones_(module.weight)
 
     def forward(
         self,
@@ -68,8 +73,11 @@ class GPT(PreTrainedModel):
         num_items_in_batch: int | None = None,
         **kwargs,
     ) -> CausalLMOutput:
-        pos = torch.arange(input_ids.size(1), device=input_ids.device).unsqueeze(0)
-        x = self.token_embd(input_ids) + self.pos_embd(pos)
+        if self.pos_embd is not None:
+            pos = torch.arange(input_ids.size(1), device=input_ids.device).unsqueeze(0)
+            x = self.token_embd(input_ids) + self.pos_embd(pos)
+        else:
+            x = self.token_embd(input_ids)
         for block in self.transformer_blocks:
             x = block(x)
         logits = self.logits_proj(self.ln_f(x))

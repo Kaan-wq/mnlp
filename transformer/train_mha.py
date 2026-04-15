@@ -66,6 +66,7 @@ def main():
         n_head=4,
         n_kv_head=4,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
         norm_type="rmsnorm",
+        pos_enc_type="relative",
         dropout=0.1,
     )
     model = GPT(model_config)
