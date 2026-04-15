@@ -48,7 +48,6 @@ def main():
     TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
     DATASET_TOKENS = 103_000_000
     STEPS_DATASET = DATASET_TOKENS // TOKENS_PER_STEP
-    print(f"Dataset steps: {STEPS_DATASET:,}")
 
     # Create tokenizer and data collator
     tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2")
@@ -78,12 +77,11 @@ def main():
 
     STEPS_OPT = non_embd_params * 20 // TOKENS_PER_STEP
     print(f"Estimated optimal number of steps: {STEPS_OPT:,}")
+    print(f"Dataset steps: {STEPS_DATASET:,}")
+    STEPS = min(STEPS_OPT, STEPS_DATASET)
 
     # Model with X parameters should be trained on Y ≃ 20 * X tokens
     # https://arxiv.org/abs/2203.15556
-
-    # We will be comparing architecture so we must set the same budget for all models.
-    STEPS = STEPS_DATASET
 
     def preprocess_function(examples):
         return tokenizer(examples["text"], truncation=False, add_special_tokens=True)
