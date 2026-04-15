@@ -15,7 +15,7 @@ from transformers import (
 )
 
 from src.config import GPTConfig
-from src.model import GPT
+from transformer.src.gpt import GPT
 
 load_dotenv()
 SEED = 20
