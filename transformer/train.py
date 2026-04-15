@@ -43,7 +43,7 @@ class PerplexityCallback(TrainerCallback):
 def main():
     set_seed(SEED)
 
-    RUN_NAME = "gpt-mha-baseline"
+    RUN_NAME = "gpt-mqa-baseline"
     BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 64, 8, 256
     TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
     DATASET_TOKENS = 103_000_000
@@ -65,7 +65,9 @@ def main():
         n_embd=128,
         n_layer=4,
         n_head=2,
-        attn_type="mha",
+        attn_type="mqa",
+        n_kv_head=2,
+        dropout=0.1,
     )
     model = GPT(model_config)
     print(f"Expected Initial Loss: {math.log(model_config.vocab_size):.3f}")
