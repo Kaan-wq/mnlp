@@ -91,6 +91,8 @@ if __name__ == "__main__":
     PROMPT = "The history of artificial intelligence"
 
     model, tokenizer = load_model(MODEL_PATH)
+    print(type(model))
+    print(isinstance(model, GPT))
 
     print("\n=== Generation ===")
     output = generate(model, tokenizer, PROMPT, max_new_tokens=100, temperature=0.8)
