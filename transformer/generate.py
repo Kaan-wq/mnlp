@@ -93,9 +93,9 @@ if __name__ == "__main__":
     model, tokenizer = load_model(MODEL_PATH)
 
     print("\n=== Generation ===")
-    output = generate(model, tokenizer, PROMPT, max_new_tokens=500, temperature=0.8)
+    output = generate(model, tokenizer, PROMPT, max_new_tokens=100, temperature=0.8)
     print(f"Prompt : {PROMPT}")
     print(f"Output : {output}")
 
     print("\n=== Benchmark ===")
-    benchmark(model, tokenizer, PROMPT, max_new_tokens=500, n_runs=5)
+    benchmark(model, tokenizer, PROMPT, max_new_tokens=100, n_runs=5)
