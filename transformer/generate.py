@@ -73,7 +73,7 @@ def benchmark(
                 max_new_tokens=max_new_tokens,
                 pad_token_id=tokenizer.eos_token_id,
                 do_sample=False,
-                use_cache=True,
+                use_cache=False,
             )
         end.record()
         torch.cuda.synchronize()
