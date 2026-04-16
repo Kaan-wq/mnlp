@@ -59,7 +59,7 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
         return x * cos + rotate_half(x) * sin
 
     def forward(
-        self, x: torch.Tensor, past_kv: tuple[torch.Tensor, torch.Tensor] | None = None
+        self, x: torch.Tensor, past_key_values=None, layer_idx=0, use_cache=False
     ) -> torch.Tensor:
         B, T, D = x.size()
         h, k, g = self.config.n_head, self.k, self.config.n_kv_head
@@ -72,23 +72,20 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
         V = self.values(x).reshape(B, T, g, k).transpose(1, 2)
 
         # update KV cache
-        if past_kv is not None:
-            K = torch.cat([past_kv[0], K], dim=2)
-            V = torch.cat([past_kv[1], V], dim=2)
-        new_kv = (K, V)
+        if use_cache and past_key_values is not None:
+            K, V = past_key_values.update(K, V, layer_idx)
 
         # Repeat K and V for each head: (B, g, T, k) -> (B, h, T, k)
         K = K.repeat_interleave(h // g, dim=1)
         V = V.repeat_interleave(h // g, dim=1)
 
+        T_total = K.shape[2]
         if self.config.pos_enc_type == "relative":
-            T_total = K.shape[2]  # full cached length
-            T_q_offset = T_total - T  # where the new query token sits
+            T_q_offset = T_total - T
             Q = self._apply_rope(Q, offset=T_q_offset, length=T)
             K = self._apply_rope(K, offset=0, length=T_total)
 
         # Softmax along the 4th dim
-        T_total = K.shape[2]
         A_masked = ((Q @ K.transpose(2, 3)) / (k**0.5)).masked_fill(
             self.att_mask[:, :, T_total - T : T_total, :T_total] == 0, float("-inf")
         )
@@ -97,4 +94,4 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
         # (B, h, T, k) -> (B, T, h, k) -> (B, T, D)
         Y = (A @ V).transpose(1, 2).reshape(B, T, D)
 
-        return self.out_proj(Y), new_kv
+        return self.out_proj(Y)

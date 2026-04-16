@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import GenerationMixin, PreTrainedModel
+from transformers.cache_utils import DynamicCache
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
 from .blocks import TransformerBlock
@@ -89,11 +90,14 @@ class GPT(PreTrainedModel, GenerationMixin):
         else:
             x = self.token_embd(input_ids)
 
-        new_past_key_values = []
+        if use_cache and past_key_values is None:
+            past_key_values = DynamicCache()
+
+        new_past_key_values = past_key_values if use_cache else None
         for i, block in enumerate(self.transformer_blocks):
-            past_kv = past_key_values[i] if past_key_values is not None else None
-            x, new_kv = block(x, past_kv=past_kv, use_cache=use_cache)
-            new_past_key_values.append(new_kv)
+            x = block(
+                x, past_key_values=new_past_key_values, layer_idx=i, use_cache=use_cache
+            )
 
         logits = self.logits_proj(self.ln_f(x))
 

@@ -57,13 +57,13 @@ class TransformerBlock(nn.Module):
         self.mlp = get_activation(config)
         self.dropout = nn.Dropout(config.dropout)
 
-    def forward(
-        self,
-        x: torch.Tensor,
-        past_kv: tuple[torch.Tensor, torch.Tensor] | None = None,
-        use_cache: bool = False,
-    ) -> torch.Tensor:
-        attn_out, new_kv = self.attn(self.ln1(x), past_kv)
+    def forward(self, x, past_key_values=None, layer_idx=0, use_cache=False):
+        attn_out = self.attn(
+            self.ln1(x),
+            past_key_values=past_key_values,
+            layer_idx=layer_idx,
+            use_cache=use_cache,
+        )
         x = x + self.dropout(attn_out)
         x = x + self.dropout(self.mlp(self.ln2(x)))
-        return x, new_kv
+        return x
