@@ -15,15 +15,37 @@ def get_norm(norm_type: str, dim: int) -> nn.Module:
         raise ValueError(f"Unknown norm type: {norm_type}")
 
 
+def get_activation(config: GPTConfig) -> nn.Module:
+    if config.activation_type == "gelu":
+        return MLP(config)
+    elif config.activation_type == "swiglu":
+        return SwiGLU(config)
+    else:
+        raise ValueError(f"Unknown activation type: {config.activation_type}")
+
+
 class MLP(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()
-        self.fc1 = nn.Linear(config.n_embd, 4 * config.n_embd)
-        self.fc2 = nn.Linear(4 * config.n_embd, config.n_embd)
+        self.fc1 = nn.Linear(config.n_embd, 4 * config.n_embd, bias=False)
+        self.fc2 = nn.Linear(4 * config.n_embd, config.n_embd, bias=False)
         self.fc2._is_residual_proj = True  # mark for scaled init
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.fc2(F.gelu(self.fc1(x)))
+
+
+class SwiGLU(nn.Module):
+    def __init__(self, config: GPTConfig) -> None:
+        super().__init__()
+        hidden_dim = int(8 / 3 * config.n_embd)
+        self.fc1 = nn.Linear(config.n_embd, hidden_dim, bias=False)
+        self.fc2 = nn.Linear(config.n_embd, hidden_dim, bias=False)
+        self.fc3 = nn.Linear(hidden_dim, config.n_embd, bias=False)
+        self.fc3._is_residual_proj = True  # mark for scaled init
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.fc3(F.silu(self.fc1(x)) * self.fc2(x))
 
 
 class TransformerBlock(nn.Module):
@@ -32,7 +54,7 @@ class TransformerBlock(nn.Module):
         self.ln1 = get_norm(config.norm_type, config.n_embd)
         self.ln2 = get_norm(config.norm_type, config.n_embd)
         self.attn = MaskedGroupedQuerySelfAttention(config)
-        self.mlp = MLP(config)
+        self.mlp = get_activation(config)
         self.dropout = nn.Dropout(config.dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
