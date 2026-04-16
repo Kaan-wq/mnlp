@@ -148,10 +148,12 @@ if __name__ == "__main__":
 
     # Cache speedup vs prompt length (single model)
     print("\n=== Cache speedup vs prompt length (MHA) ===")
-    benchmark_cache(model, max_new_tokens=20, prompt_lengths=[8, 16, 32, 64], n_runs=3)
+    benchmark_cache(
+        model, max_new_tokens=20, prompt_lengths=[8, 16, 32, 64], n_runs=100
+    )
     del model
     torch.cuda.empty_cache()
 
     # MHA vs MQA vs GQA comparison with cache
     print("\n=== MHA vs MQA vs GQA — cache enabled ===")
-    benchmark_models(MODEL_PATHS, max_new_tokens=20, prompt_len=32, n_runs=3)
+    benchmark_models(MODEL_PATHS, max_new_tokens=20, prompt_len=32, n_runs=100)
