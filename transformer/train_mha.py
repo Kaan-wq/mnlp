@@ -43,7 +43,7 @@ class PerplexityCallback(TrainerCallback):
 def main():
     set_seed(SEED)
 
-    RUN_NAME = "gpt-mqa-RoPE"
+    RUN_NAME = "gpt-gqa-RoPE"
     BATCH_SIZE, GRAD_ACC_STEPS, MAX_SEQ_LEN = 128, 4, 128
     TOKENS_PER_STEP = BATCH_SIZE * GRAD_ACC_STEPS * MAX_SEQ_LEN
     DATASET_TOKENS = 103_000_000
@@ -64,7 +64,7 @@ def main():
         n_embd=64,
         n_layer=6,
         n_head=4,
-        n_kv_head=1,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
+        n_kv_head=2,  # MHA n_head == n_kv_head | MQA n_kv_head == 1
         norm_type="rmsnorm",
         pos_enc_type="relative",
         activation_type="gelu",
