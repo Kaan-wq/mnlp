@@ -30,3 +30,4 @@ class GPTConfig(PreTrainedConfig):
         self.pos_enc_type = pos_enc_type
         self.activation_type = activation_type
         self.dropout = dropout
+        self.cache_implementation = None
