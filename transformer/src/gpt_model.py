@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import PreTrainedModel
-from transformers.modeling_outputs import CausalLMOutput
+from transformers.modeling_outputs import CausalLMOutput, CausalLMOutputWithPast
 
 from .blocks import TransformerBlock
 from .config import GPTConfig
@@ -71,15 +71,30 @@ class GPT(PreTrainedModel):
         input_ids: torch.Tensor,
         labels: torch.Tensor | None = None,
         num_items_in_batch: int | None = None,
+        past_key_values: tuple | None = None,
+        use_cache: bool = False,
         **kwargs,
     ) -> CausalLMOutput:
+        if past_key_values is not None:
+            input_ids = input_ids[:, -1:]  # only last token
+
         if self.pos_embd is not None:
-            pos = torch.arange(input_ids.size(1), device=input_ids.device).unsqueeze(0)
+            offset = (
+                past_key_values[0][0].shape[2] if past_key_values is not None else 0
+            )
+            pos = torch.arange(
+                offset, offset + input_ids.size(1), device=input_ids.device
+            ).unsqueeze(0)
             x = self.token_embd(input_ids) + self.pos_embd(pos)
         else:
             x = self.token_embd(input_ids)
-        for block in self.transformer_blocks:
-            x = block(x)
+
+        new_past_key_values = []
+        for i, block in enumerate(self.transformer_blocks):
+            past_kv = past_key_values[i] if past_key_values is not None else None
+            x, new_kv = block(x, past_kv=past_kv, use_cache=use_cache)
+            new_past_key_values.append(new_kv)
+
         logits = self.logits_proj(self.ln_f(x))
 
         loss = None
@@ -94,4 +109,8 @@ class GPT(PreTrainedModel):
             if num_items_in_batch is not None:
                 loss = loss / num_items_in_batch
 
-        return CausalLMOutput(loss=loss, logits=logits)
+        return CausalLMOutputWithPast(
+            loss=loss,
+            logits=logits,
+            past_key_values=tuple(new_past_key_values) if use_cache else None,
+        )

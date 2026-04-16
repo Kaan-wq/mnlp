@@ -53,12 +53,14 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
                 "sin_embd", torch.sin(angle_matrix).repeat(1, 2)
             )  # (T, k)
 
-    def _apply_rope(self, x: torch.Tensor, T: int) -> torch.Tensor:
-        cos = self.cos_embd[:T].unsqueeze(0).unsqueeze(0)  # (1, 1, T, k)
-        sin = self.sin_embd[:T].unsqueeze(0).unsqueeze(0)  # (1, 1, T, k)
+    def _apply_rope(self, x: torch.Tensor, offset: int, length: int) -> torch.Tensor:
+        cos = self.cos_embd[offset : offset + length].unsqueeze(0).unsqueeze(0)
+        sin = self.sin_embd[offset : offset + length].unsqueeze(0).unsqueeze(0)
         return x * cos + rotate_half(x) * sin
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, past_kv: tuple[torch.Tensor, torch.Tensor] | None = None
+    ) -> torch.Tensor:
         B, T, D = x.size()
         h, k, g = self.config.n_head, self.k, self.config.n_kv_head
 
@@ -69,21 +71,30 @@ class MaskedGroupedQuerySelfAttention(nn.Module):
         K = self.keys(x).reshape(B, T, g, k).transpose(1, 2)
         V = self.values(x).reshape(B, T, g, k).transpose(1, 2)
 
+        # update KV cache
+        if past_kv is not None:
+            K = torch.cat([past_kv[0], K], dim=2)
+            V = torch.cat([past_kv[1], V], dim=2)
+        new_kv = (K, V)
+
         # Repeat K and V for each head: (B, g, T, k) -> (B, h, T, k)
         K = K.repeat_interleave(h // g, dim=1)
         V = V.repeat_interleave(h // g, dim=1)
 
         if self.config.pos_enc_type == "relative":
-            Q = self._apply_rope(Q, T)
-            K = self._apply_rope(K, T)
+            T_total = K.shape[2]  # full cached length
+            T_q_offset = T_total - T  # where the new query token sits
+            Q = self._apply_rope(Q, offset=T_q_offset, length=T)
+            K = self._apply_rope(K, offset=0, length=T_total)
 
         # Softmax along the 4th dim
+        T_total = K.shape[2]
         A_masked = ((Q @ K.transpose(2, 3)) / (k**0.5)).masked_fill(
-            self.att_mask[:, :, :T, :T] == 0, float("-inf")
+            self.att_mask[:, :, T_total - T : T_total, :T_total] == 0, float("-inf")
         )
         A = F.softmax(A_masked, dim=-1)
 
         # (B, h, T, k) -> (B, T, h, k) -> (B, T, D)
         Y = (A @ V).transpose(1, 2).reshape(B, T, D)
 
-        return self.out_proj(Y)
+        return self.out_proj(Y), new_kv
