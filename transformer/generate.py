@@ -87,7 +87,7 @@ def benchmark(
 
 
 if __name__ == "__main__":
-    MODEL_PATH = "kaanino/gpt-mha-RoPE"
+    MODEL_PATH = "kaanino/gpt-mqa-RoPE"
     PROMPT = "The history of artificial intelligence"
 
     model, tokenizer = load_model(MODEL_PATH)
