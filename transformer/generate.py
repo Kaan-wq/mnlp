@@ -108,39 +108,13 @@ def benchmark_cache(model, max_new_tokens=20, prompt_lengths=None, n_runs=3):
         )
 
 
-def benchmark_models(model_paths, max_new_tokens=20, prompt_len=32, n_runs=3):
-    """Compare MHA vs MQA vs GQA with cache enabled."""
-    print(
-        f"\n  {'Model':<30} {'No cache (tok/s)':<20} "
-        f"{'Cache (tok/s)':<18} {'Speedup':>8}"
-    )
-    print(f"  {'-' * 78}")
-
-    for path in model_paths:
-        model, tokenizer = load_model(path)
-        input_ids = torch.randint(0, model.config.vocab_size, (1, prompt_len)).to(
-            DEVICE
-        )
-        tps_no_cache = _run_timed(
-            model, input_ids, max_new_tokens, use_cache=False, n_runs=n_runs
-        )
-        tps_cache = _run_timed(
-            model, input_ids, max_new_tokens, use_cache=True, n_runs=n_runs
-        )
-        speedup = tps_cache / tps_no_cache
-        name = path.split("/")[-1]
-        print(f"  {name:<30} {tps_no_cache:<20.1f} {tps_cache:<18.1f} {speedup:>7.2f}x")
-        del model
-        torch.cuda.empty_cache()
-
-
 if __name__ == "__main__":
     print("=" * 65)
     print("  KV Cache Benchmark")
     print("=" * 65)
 
     # Generation sanity check
-    model, tokenizer = load_model(MODEL_PATHS[0])
+    model, tokenizer = load_model(MODEL_PATHS[1])
     print("\n=== Generation sample ===")
     output = generate(model, tokenizer, PROMPT, max_new_tokens=50, temperature=0.8)
     print(f"  Prompt : {PROMPT}")
@@ -153,7 +127,3 @@ if __name__ == "__main__":
     )
     del model
     torch.cuda.empty_cache()
-
-    # MHA vs MQA vs GQA comparison with cache
-    print("\n=== MHA vs MQA vs GQA — cache enabled ===")
-    benchmark_models(MODEL_PATHS, max_new_tokens=20, prompt_len=32, n_runs=100)
