@@ -116,5 +116,5 @@ class GPT(PreTrainedModel, GenerationMixin):
         return CausalLMOutputWithPast(
             loss=loss,
             logits=logits,
-            past_key_values=tuple(new_past_key_values) if use_cache else None,
+            past_key_values=new_past_key_values if use_cache else None,
         )
