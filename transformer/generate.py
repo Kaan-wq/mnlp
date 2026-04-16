@@ -114,7 +114,7 @@ if __name__ == "__main__":
     print("=" * 65)
 
     # Generation sanity check
-    model, tokenizer = load_model(MODEL_PATHS[1])
+    model, tokenizer = load_model(MODEL_PATHS[2])
     print("\n=== Generation sample ===")
     output = generate(model, tokenizer, PROMPT, max_new_tokens=50, temperature=0.8)
     print(f"  Prompt : {PROMPT}")
