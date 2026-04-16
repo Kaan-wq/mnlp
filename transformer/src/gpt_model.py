@@ -3,14 +3,14 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import PreTrainedModel
-from transformers.modeling_outputs import CausalLMOutput, CausalLMOutputWithPast
+from transformers import GenerationMixin, PreTrainedModel
+from transformers.modeling_outputs import CausalLMOutputWithPast
 
 from .blocks import TransformerBlock
 from .config import GPTConfig
 
 
-class GPT(PreTrainedModel):
+class GPT(PreTrainedModel, GenerationMixin):
     config_class = GPTConfig
 
     def __init__(self, config: GPTConfig) -> None:
@@ -74,7 +74,7 @@ class GPT(PreTrainedModel):
         past_key_values: tuple | None = None,
         use_cache: bool = False,
         **kwargs,
-    ) -> CausalLMOutput:
+    ) -> CausalLMOutputWithPast:
         if past_key_values is not None:
             input_ids = input_ids[:, -1:]  # only last token
 
