@@ -23,6 +23,7 @@ class GPTConfig(PreTrainedConfig):
         self.max_seq_length = max_seq_length
         self.n_embd = n_embd
         self.n_layer = n_layer
+        self.num_hidden_layers = n_layer
         self.n_head = n_head
         self.n_kv_head = n_kv_head
         self.norm_type = norm_type
